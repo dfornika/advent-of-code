@@ -1,1 +1,3 @@
 templates/clojure/.cpcache
+templates/rust/aoc/target
+templates/rust/aoc/Cargo.lock
