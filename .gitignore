@@ -1,3 +1,5 @@
 templates/clojure/.cpcache
 templates/rust/aoc/target
 templates/rust/aoc/Cargo.lock
+.cpcache
+.nrepl-port
