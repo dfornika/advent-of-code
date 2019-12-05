@@ -1,4 +1,4 @@
-(ns aoc.2019.01.core
+(ns aoc.2019.01.part-1
   (:gen-class))
 
 (defn calculate-fuel
