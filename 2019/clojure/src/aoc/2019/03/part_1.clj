@@ -43,6 +43,15 @@
         (update-in [:position :y] #(+ % distance))
         (assoc-in [:points] (set/union (:points initial-state) new-points)))))
 
+(defn manhattan-distance
+  [p1 p2]
+  (let [x1 (:x p1)
+        y1 (:y p1)
+        x2 (:x p2)
+        y2 (:y p2)]
+    (+ (Math/abs (- x2 x1)) (Math/abs (- y2 y1)))
+    ))
+
 (defn add-points
   [initial-state movement]
   (let [direction (first movement)
@@ -61,16 +70,59 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (def input-file "../input_1.txt")
-  #_(def input-file *in*)
+  ;; (def input-file "../input_1.txt")
+  (def input-file *in*)
   (def wire-paths (mapv #(str/split % #",") (str/split (slurp input-file) #"\n")))
-  
-  (prn wire-paths))
+
+  (def origin {:x 0 :y 0})
+  (def initial-state {:position origin
+                      :points #{}})
+
+  (def wire-1
+    (loop [state initial-state
+           path (first wire-paths)]
+      (if (empty? path)
+        (:points state)
+        (recur (add-points state (first path))
+               (rest path)))))
+
+  (def wire-2
+    (loop [state initial-state
+           path (second wire-paths)]
+      (if (empty? path)
+        (:points state)
+        (recur (add-points state (first path))
+               (rest path)))))
+
+  (prn (set/intersection wire-1 wire-2))
+  #_(println (apply min (map (partial manhattan-distance origin) (set/intersection wire-1 wire-2)))))
 
 (comment
   (def wire-1-path ["R75" "D30" "R83" "U83" "L12" "D49" "R71" "U7" "L72"])
   (def wire-2-path ["U62" "R66" "U55" "R34" "D71" "R55" "D58" "R83"])
   (def origin {:x 0 :y 0})
-  (def initial-state  {:position origin :points #{origin}})
-  (add-points initial-state "U5")
+  (def initial-state  {:position origin :points #{}})
+  (def wire-1
+    (-> initial-state
+      (add-points "R75")
+      (add-points "D30")
+      (add-points "R83")
+      (add-points "U83")
+      (add-points "L12")
+      (add-points "D49")
+      (add-points "R71")
+      (add-points "U7")
+      (add-points "L72")))
+  (def wire-2
+    (-> initial-state
+        (add-points "U62")
+        (add-points "R66")
+        (add-points "U55")
+        (add-points "R34")
+        (add-points "D71")
+        (add-points "R55")
+        (add-points "D58")
+        (add-points "R83")))
+  (map (partial manhattan-distance origin) (set/intersection (:points wire-1) (:points wire-2)))
+  
   )
