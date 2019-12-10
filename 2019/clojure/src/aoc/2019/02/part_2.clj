@@ -17,10 +17,10 @@
            :instruction-pointer (+ ip 1 (count parameters)))))
 
 (defn opcode-2
-    "Given a program and a program counter (pc):
-    - Treat the next three values after (nth program pc) as pointers into the program.
+    "Given a program and an instruction pointer (ip):
+    - Treat the next three values after (nth memory ip) as pointers into the program.
     - Dereference the first two pointers and multiply their values
-    - Dereference the third pointer and replace that value with the above sum.
+    - Dereference the third pointer and replace that value with the above product.
     - return the updated program"
   [state]
   (let [{:keys [memory instruction-pointer halted]} state
