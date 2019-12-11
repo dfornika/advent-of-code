@@ -78,7 +78,7 @@
       (move-up initial-state distance))))
 
 (defn intersection-points
-  [wire-1 wire2]
+  [wire-1 wire-2]
   (set/intersection (set (map #(select-keys % [:x :y]) (:points wire-1)))
                     (set (map #(select-keys % [:x :y]) (:points wire-2)))))
 
@@ -90,7 +90,7 @@
 
 (defn -main
   [& args]
-  ;; (def input-file "../inputs/input_03.txt")
+  (def input-file "../inputs/test_input_03_small.txt")
   (def input-file *in*)
   (def wire-paths (mapv #(str/split % #",") (str/split (slurp input-file) #"\n")))
 
@@ -99,16 +99,25 @@
                       :points #{}})
 
   (def wire-1
-    (:points (reduce add-points initial-state (first wire-paths))))
+    (reduce add-points initial-state (first wire-paths)))
 
   (def wire-2
-    (:points (reduce add-points initial-state (second wire-paths))))
+    (reduce add-points initial-state (second wire-paths)))
 
-  (map (partial intersection-length wire-1) (intersection-points wire-1 wire-2))
-  
-  (map (partial intersection-length wire-2) (intersection-points wire-1 wire-2))
+  (def wire-1-intersections
+    (flatten (map (partial intersection-length wire-1) (intersection-points wire-1 wire-2))))
 
-  (println (apply min (map (partial manhattan-distance origin) intersections))))
+  (def wire-2-intersections
+    (flatten (map (partial intersection-length wire-2) (intersection-points wire-1 wire-2))))
+
+  (println
+   (apply min
+          (remove nil?
+                  (for [a wire-1-intersections
+                        b wire-2-intersections]
+                    (if (and (= (:x a) (:x b))
+                             (= (:y a) (:y b)))
+                      (+ (:length a) (:length b))))))))
 
 (comment
   (def wire-1-path ["R8" "U5" "L5" "D3"])
