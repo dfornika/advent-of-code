@@ -14,8 +14,8 @@
 
 (defn -main
   [& args]
-  (def input-file "../inputs/input_04.txt")
-  ;; (def input-file *in*)
+  ;; (def input-file "../inputs/input_04.txt")
+  (def input-file *in*)
   (def password-range (map read-string (-> (slurp input-file)
                                            str/trim-newline
                                            (str/split #"-"))))
