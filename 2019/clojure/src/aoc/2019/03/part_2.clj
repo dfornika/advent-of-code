@@ -7,44 +7,52 @@
   ""
   [initial-state distance]
   (let [initial-x (get-in initial-state [:position :x])
+        initial-length (get-in initial-state [:position :length])
         new-xs (range (inc initial-x) (+ initial-x (inc distance)))
         y (get-in initial-state [:position :y])
-        new-points (set (map #(assoc {:y y} :x %) new-xs))]
+        new-points (set (map #(assoc {:y y} :x % :length (+ initial-length (- % initial-x))) new-xs))]
     (-> initial-state
-        (update-in [:position :x] #(+ % distance))
+        (update-in [:position :x] + distance)
+        (update-in [:position :length] + distance)
         (assoc-in [:points] (set/union (:points initial-state) new-points)))))
 
 (defn move-down
   ""
   [initial-state distance]
   (let [initial-y (get-in initial-state [:position :y])
+        initial-length (get-in initial-state [:position :length])
         new-ys (range (- initial-y distance) initial-y)
         x (get-in initial-state [:position :x])
-        new-points (set (map #(assoc {:x x} :y %) new-ys))]
+        new-points (set (map #(assoc {:x x} :y % :length (+ initial-length (- initial-y %))) new-ys))]
     (-> initial-state
         (update-in [:position :y] #(- % distance))
+        (update-in [:position :length] + distance)
         (assoc-in [:points] (set/union (:points initial-state) new-points)))))
 
 (defn move-left
   ""
   [initial-state distance]
   (let [initial-x (get-in initial-state [:position :x])
+        initial-length (get-in initial-state [:position :length])
         new-xs (range (- initial-x distance) initial-x)
         y (get-in initial-state [:position :y])
-        new-points (set (map #(assoc {:y y} :x %) new-xs))]
+        new-points (set (map #(assoc {:y y} :x % :length (+ initial-length (- initial-x %))) new-xs))]
     (-> initial-state
-        (update-in [:position :x] #(- % distance))
+        (update-in [:position :x] - distance)
+        (update-in [:position :length] + distance)
         (assoc-in [:points] (set/union (:points initial-state) new-points)))))
 
 (defn move-up
   ""
   [initial-state distance]
   (let [initial-y (get-in initial-state [:position :y])
+        initial-length (get-in initial-state [:position :length])
         new-ys (range (inc initial-y) (+ initial-y (inc distance)))
         x (get-in initial-state [:position :x])
-        new-points (set (map #(assoc {:x x} :y %) new-ys))]
+        new-points (set (map #(assoc {:x x} :y % :length (+ initial-length (- % initial-y))) new-ys))]
     (-> initial-state
-        (update-in [:position :y] #(+ % distance))
+        (update-in [:position :y] +  distance)
+        (update-in [:position :length] + distance)
         (assoc-in [:points] (set/union (:points initial-state) new-points)))))
 
 (defn manhattan-distance
@@ -69,13 +77,24 @@
       (= direction \U)
       (move-up initial-state distance))))
 
+(defn intersection-points
+  [wire-1 wire2]
+  (set/intersection (set (map #(select-keys % [:x :y]) (:points wire-1)))
+                    (set (map #(select-keys % [:x :y]) (:points wire-2)))))
+
+(defn intersection-length
+  [wire intersection-point]
+  (filter #(and (= (:x intersection-point) (:x %))
+                (= (:y intersection-point) (:y %)))
+          (:points wire)))
+
 (defn -main
   [& args]
   ;; (def input-file "../inputs/input_03.txt")
   (def input-file *in*)
   (def wire-paths (mapv #(str/split % #",") (str/split (slurp input-file) #"\n")))
 
-  (def origin {:x 0 :y 0})
+  (def origin {:x 0 :y 0 :length 0})
   (def initial-state {:position origin
                       :points #{}})
 
@@ -85,7 +104,11 @@
   (def wire-2
     (:points (reduce add-points initial-state (second wire-paths))))
 
-  (println (apply min (map (partial manhattan-distance origin) (set/intersection wire-1 wire-2)))))
+  (map (partial intersection-length wire-1) (intersection-points wire-1 wire-2))
+  
+  (map (partial intersection-length wire-2) (intersection-points wire-1 wire-2))
+
+  (println (apply min (map (partial manhattan-distance origin) intersections))))
 
 (comment
   (def wire-1-path ["R8" "U5" "L5" "D3"])
@@ -94,12 +117,12 @@
   (def wire-2-path ["U62" "R66" "U55" "R34" "D71" "R55" "D58" "R83"])
   (def wire-1-path ["R98" "U47" "R26" "D63" "R33" "U87" "L62" "D20" "R33" "U53" "R51"])
   (def wire-2-path ["U98" "R91" "D20" "R16" "D67" "R40" "U7" "R15" "U6" "R7"])
-  (def origin {:x 0 :y 0})
+  (def origin {:x 0 :y 0 :length 0})
   (def initial-state  {:position origin :points #{}})
   (def wire-1
     (reduce add-points initial-state wire-1-path))
   (def wire-2
     (reduce add-points initial-state wire-2-path))
-  (apply min (map (partial manhattan-distance origin) (set/intersection (:points wire-1) (:points wire-2))))
+  
   
   )
