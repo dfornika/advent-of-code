@@ -27,6 +27,6 @@
   (println (count passwords-meeting-criteria)))
 
 (comment
-  (def password-range [111111 223450 123789])
-  (map (every-pred two-adjacent-digits digits-never-decrease) password-range)
+  (def password-examples [112233 123444 111122])
+  (map (every-pred two-adjacent-digits digits-never-decrease) password-examples)
   )
