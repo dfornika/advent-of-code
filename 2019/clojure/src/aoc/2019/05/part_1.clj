@@ -6,14 +6,26 @@
   [number]
   (map #(Character/digit % 10) (str number)))
 
-(defn get-modes
+(defn get-opcode
   [instruction]
-  (let [opcode (last (digits instruction))
-        modes (drop-last 2 (digits (format "%05d" instruction)))
+  (last (digits instruction)))
+
+(defn get-parameter-modes
+  [instruction]
+  (let [modes (drop-last 2 (digits (format "%05d" instruction)))
         modes-map {0 :position
                    1 :immediate}]
-    {:opcode opcode
-     :parameter-modes (map modes-map modes)}))
+     (reverse (map modes-map modes))))
+
+(defn get-operands
+  [state]
+  (let [{:keys [memory instruction-pointer halted]} state
+        ip instruction-pointer
+        parameter-modes (get-parameter-modes (nth memory ip))
+        ]
+    (map
+     (cond (= parameter-mode :position) (nth memory parameter)
+           (= parameter-mode :immediate) parameter))))
 
 (defn opcode-1
   "Given a block of memory and an instruction pointer (ip):
@@ -25,11 +37,10 @@
   (let [{:keys [memory instruction-pointer halted]} state
         ip instruction-pointer
         parameters (take 3 (drop (inc ip) memory))
-        parameter-modes (get-modes (nth memory ip))]
-    (assoc state :memory (assoc memory (last parameters) (+ (nth memory (first parameters))
-                                                            (nth memory (second parameters))))
-           :instruction-pointer (+ ip 1 (count parameters))
-           :pm parameter-modes)))
+        
+        operands (get-operands state)]
+    (assoc state :memory (assoc memory (last parameters) (reduce + operands)
+                                :instruction-pointer (+ ip 1 (count parameters)))))
 
 (defn opcode-2
     "Given a program and an instruction pointer (ip):
@@ -40,10 +51,11 @@
   [state]
   (let [{:keys [memory instruction-pointer halted]} state
         ip instruction-pointer
-        parameters (take 3 (drop (inc ip) memory))]
-    (assoc state :memory (assoc memory (last parameters) (* (nth memory (first parameters))
-                                                            (nth memory (second parameters))))
-           :instruction-pointer (+ ip 1 (count parameters)))))
+        parameters (take 3 (drop (inc ip) memory))
+        parameter-modes (get-parameter-modes (nth memory ip))
+        operands (get-operands state)]
+    (assoc state :memory (assoc memory (last parameters) (reduce * operands)
+                                :instruction-pointer (+ ip 1 (count parameters)))))
 
 (defn opcode-3
   [state]
@@ -68,10 +80,6 @@
   [state]
   (assoc state :halted true))
 
-(defn initialize-memory
-  [state noun verb]
-  (let [memory (:memory state)]
-    (assoc-in state [:memory] (assoc memory 1 noun 2 verb))))
 
 (defn -main
   [& args]
@@ -89,13 +97,13 @@
                       :halted false})
   
   (defn compute
-    [initial-state noun verb]
-    (loop [state (initialize-memory initial-state noun verb)]
-      (if (:halted state)
-        {:state state :noun noun :verb verb}
-        (recur ((instruction-set (nth (:memory state) (:instruction-pointer state))) state)))))
+    [state instruction-set]
+    (loop [state state]
+        (if (:halted state)
+          state
+          (recur ((instruction-set (get-opcode (nth (:memory state) (:instruction-pointer state)))) state)))))
 
-  
+
   )
 
 
@@ -103,8 +111,6 @@
 (comment
   
   (def memory [3 0 4 0 99])
-  (def noun 9)
-  (def verb 10)
   (def initial-state {:instruction-pointer 0 :memory memory :halted false})
-  (compute initial-state noun verb)
+  (compute initial-state instruction-set)
   )
