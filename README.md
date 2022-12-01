@@ -12,5 +12,6 @@ All solutions are designed to take input from `stdin` and write output to `stdou
 Use the `clj` command-line runner:
 
 ```
-clj -m aoc.2019.01.part-1 < input.txt
+cd clojure/2022
+clj -M -m aoc.2022.01.part-1 < input.txt
 ```
