@@ -25,15 +25,15 @@
 
 (defn decode-char
   ""
-  [c]
+  [decoder-key c]
   (get decoder-key c))
 
 
 (defn decode-line
   ""
-  [line]
+  [decoder-key line]
   (let [chars (map first (str/split line #"\s"))]
-    (map decode-char chars)))
+    (map #(decode-char decoder-key %) chars)))
 
 
 (defn score-move
@@ -63,7 +63,7 @@
   [& args]
   (let [input (str/split-lines (slurp *in*))]
     (->> input
-         (map decode-line)
+         (map #(decode-line decoder-key %))
          (map score-round)
          (reduce +)
          println)))
@@ -74,8 +74,10 @@
   (def example-input (->> (io/resource "02_part_1_example_input.txt")
                           slurp
                           str/split-lines))
-  (decode \A)
-  (def rounds (map decode-line example-input))
+
+  (decode-line decoder-key (first example-input))
+
+  (def rounds (map #(decode-line decoder-key %) example-input))
 
   (score-outcome (first rounds))
   (score-outcome (second rounds))
