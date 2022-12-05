@@ -12,7 +12,7 @@
     (range min (inc max))))
 
 
-(defn one-fully-contains-another
+(defn one-fully-contains-another?
   ""
   [[set-1 set-2]]
   (or (empty? (set/difference set-1 set-2))
@@ -26,7 +26,7 @@
          (map #(str/split % #","))
          (map #(map expand-range %))
          (map #(map set %))
-         (map one-fully-contains-another)
+         (map one-fully-contains-another?)
          (map {false 0 true 1})
          (reduce +)
          println)))
