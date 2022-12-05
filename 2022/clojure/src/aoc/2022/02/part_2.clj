@@ -35,7 +35,7 @@
 
 
 (comment
-  (def example-input (->> (io/resource "02_part_1_example_input.txt")
+  (def example-input (->> (io/resource "02_example_input.txt")
                           slurp
                           str/split-lines))
   (part-1/decode-char decoder-key \A)

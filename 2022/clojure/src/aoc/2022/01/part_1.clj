@@ -38,7 +38,7 @@
 
 (comment
 
-  (def example-input (->> (io/resource "01_part_1_example_input.txt")
+  (def example-input (->> (io/resource "01_example_input.txt")
                           slurp
                           str/split-lines))
 
