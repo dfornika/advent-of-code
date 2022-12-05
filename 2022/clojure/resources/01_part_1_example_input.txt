@@ -1,1 +1,0 @@
-../../example-inputs/01_part_1_example_input.txt
